@@ -1,0 +1,32 @@
+name: Remove stale previews
+on:
+  schedule:
+    - cron: "0 1 * * *"
+
+jobs:
+  remove_stale:
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v3
+
+      - name: Fetch gh-pages branch
+        run: git fetch origin gh-pages --depth=1
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install pygithub
+
+      - name: Set up git
+        run:  |
+          git config --global user.name 'docs preview action' 
+          git config --global user.email 'jacob@z7x.org'
+
+      - name: Remove stale preview builds
+        run: python remove_stale.py ${{ secrets.GITHUB_TOKEN }} jolt-org/project-template
